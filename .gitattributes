@@ -1,0 +1,2 @@
+*.pkl filter=lfs diff=lfs merge=lfs -text
+results/df_total_texts.csv filter=lfs diff=lfs merge=lfs -text
