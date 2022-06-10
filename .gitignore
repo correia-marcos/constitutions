@@ -128,3 +128,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .Rproj.user
+
+# Big Results files
+results/df_lemma(not_cleaned).pkl
+results/df_total.pkl
+results/df_total_all_set.pkl
