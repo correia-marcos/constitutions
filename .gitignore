@@ -142,5 +142,5 @@ Data/all/.
 Data/all/**
 Data/simple_all/.
 Data/simple_all/**
-
+results/df_total_texts.csv
 
