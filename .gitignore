@@ -134,8 +134,11 @@ results/df_lemma(not_cleaned).pkl
 results/df_total.pkl
 results/df_total_all_set.pkl
 results/csv/constitutions.csv
+<<<<<<< HEAD
 
 # Senstitive Data
 Data/all/.
 Data/simple_all/.
 
+=======
+>>>>>>> 8388d0769a5baa0fbc3d017513263b3fcfb5cd6e
