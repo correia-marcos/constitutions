@@ -112,6 +112,7 @@ venv.bak/
 
 # Spyder project settings
 .spyderproject
+.spyderproject/**
 .spyproject
 
 # Rope project settings
@@ -138,6 +139,8 @@ results/csv/constitutions.csv
 
 # Senstitive Data
 Data/all/.
+Data/all/**
 Data/simple_all/.
+Data/simple_all/**
 
 
