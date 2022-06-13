@@ -1,26 +1,18 @@
 # -*- coding: utf-8 -*-
 """
-Basic main code.
+Creates the LDA object.
 
-@author: marcola
+@author: Marcos
 """
-import glob
-import os
-import pandas as pd
-import io
-import re
+import itertools
 from pprint import pprint
 from collections import Counter
+import pandas as pd
+import ast
 
-import nltk
-from nltk.corpus import stopwords
-
-import spacy
 import gensim
 import gensim.corpora as corpora
-from gensim.utils import simple_preprocess
 from gensim.models import CoherenceModel
-from gensim.parsing.preprocessing import STOPWORDS
 
 import pyLDAvis
 import pyLDAvis.gensim_models as gensimvis
@@ -29,270 +21,51 @@ import matplotlib.pyplot as plt
 import logging
 import warnings
 
-# Not important to understand, make it easier to see what is happenning in LDA
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s',
-                    level=logging.INFO)
-os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
-
-# Local of texts
-
-# loc_en = r'data\eng'
-# loc_es = r'data\es'
-loc_total = r'data\simple_all'
-
-# Getting the list of all texts
-
-# en_texts = glob.glob(os.path.join(loc_en, '*.txt'))
-# es_texts = glob.glob(os.path.join(loc_es, '*.txt'))
-all_texts = glob.glob(os.path.join(loc_total, '*.txt'))
-
-
-def get_df(texts):
+def new_func():
+    """Not important to understand, make it easier to see what is happening in LDA.
     """
-    Create a Df from a list of texts - their name in local memory.
-
-    It makes a DF of the name, year (from its names) and content of each text.
-
-    Parameters
-    ----------
-    texts : TYPE list
-        DESCRIPTION. list of all txt files (constitutions) of the same
-        language.
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
+    logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s',
+                        level=logging.INFO)
 
 
-    Returns
-    -------
-    None.
+new_func()
 
-    """
-    country = []
-    year = []
-    constitution = []
+# Reading important files and taking lists (better to work)
 
-    for txt in texts:
-        country_year = os.path.splitext((os.path.basename(txt)))[0]
-        country.append(' '.join(country_year.split('_')[:-1]))
-        year.append(country_year.split('_')[-1])
-
-        with io.open(txt, 'r', encoding='utf-8', errors='ignore') as fout:
-            constitution.append(''.join(fout.readlines()))
-
-    corpus = pd.DataFrame({'country': country, 'year': year,
-                           'constitution': constitution})
-
-    return corpus
+# %%
+xs = ['1', '2', '3']
+s = ''.join(xs)
+print(s)
+# %%
 
 
-def lemmatization(texts):
-    """See https://spacy.io/api/annotation."""
-    texts_out = []
-    nlp = spacy.load('en_core_web_lg', disable=['parser', 'ner'])
-    for sent in texts:
-        doc = nlp(sent)
-        texts_out.append([token.lemma_ for token in doc])
-    return texts_out
+def get_df_and_list():
+    df_total = pd.read_csv('./results/df_total_texts.csv').iloc[:, 1:]
+    data_words = df_total.constitution_lemma.to_list()
+    return df_total, data_words
 
 
-# Creating DF and then applying lemmatization. Important to do before
-# preprocessing.
+df_total, data_words = get_df_and_list()
 
-# corpus_eng = get_df(en_texts)
-# corpus_es = get_df(es_texts)
-corpus_all = get_df(all_texts)
-
-# data_eng = corpus_eng.constitution.to_list()
-# eng_lemma = lemmatization(data_eng)
-# eng_lemma = [' '.join(item) for item in eng_lemma]
+# Reading important files and taking lists (better to work)
 
 
-# data_es = corpus_es.constitution.tolist()
-# es_lemma = lemmatization(data_es)
-# es_lemma = [' '.join(item) for item in es_lemma]
+def get_constitutions_bigrams():
+    """Get the constitutions dataframe from csv and take the necessary column."""
+    constitutions = pd.read_csv('results/csv/constitutions.csv')
+
+    # Note that the column 'document' has a string that appear as a list.
+    # We deal with this small misbehavior by apllying the ast library,
+    # ast.literal_eval function.
+    data_words_bigrams = constitutions['document'].apply(
+        lambda x: ast.literal_eval(x)).to_list()
+
+    return data_words_bigrams
 
 
-data_all = corpus_all.constitution.tolist()
-all_lemma = lemmatization(data_all)
-all_lemma = [' '.join(item) for item in all_lemma]
-
-
-# Adding the new lemmatized data to the respectves DFs
-# corpus_eng['constitution_lemma'] = eng_lemma
-# corpus_es['constitution_lemma'] = es_lemma
-corpus_all['constitution_lemma'] = all_lemma
-
-corpus_all.to_pickle(r'results/df_lemma(not_cleaned).pkl')
-
-
-def clean_text(text):
-    """
-    Clean up text data.
-
-    Make text lowercase, remove text in square brackets, remove
-    punctuation, remove digits in general, remove urls, remove
-    emails and remove "" caracteres.
-    Also remove some common and bad words such as "Chapter" and "Copyright".
-    """
-    text = text.lower()
-    text = re.sub(r"\(.*?\)", "()", text)
-    text = re.sub(r"\(.*?\)", "<>", text)
-    text = re.sub(r'\[.*?\]', '', text)
-    text = re.sub(r'[!,:\-;\.\?\(\)]', '', text)
-    text = ''.join(i for i in text if not i.isdigit())
-    text = re.sub(r'^https?:\/\/.*[\r\n]*', '', text)
-    text = re.sub(r'http\S+', '', text)
-    text = re.sub(r'[‘’“”…]', '', text)
-    text = re.sub('\n', ' ', text)
-    text = re.sub(r'<list>', ' ', text)
-    text = re.sub(r'<title>', ' ', text)
-    text = re.sub(r'<title', ' ', text)
-    text = re.sub(r'<preamble>', ' ', text)
-    text = re.sub(r'</list>', '', text)
-    text = re.sub(r'/', '', text)
-    text = re.sub(r'Chapter', '', text)
-    text = re.sub(r'chapter', '', text)
-    text = re.sub('(\\b[A-Za-z] \\b|\\b [A-Za-z]\\b)', '', text)
-    text = re.sub(r'section', '', text)
-    text = re.sub(r'&', '', text)
-    text = re.sub(r'-(?!\w)|(?<!\w)-', '', text)
-    text = re.sub(r'_', '', text)
-    text = re.sub(r'©', '', text)
-    text = re.sub(r'@', '', text)
-
-    return text
-
-
-# Apllying the cleaning approach to texts
-# corpus_eng.constitution_lemma = corpus_eng['constitution_lemma'].apply(
-#     lambda x: clean_text(x))
-# corpus_eng.constitution = corpus_eng['constitution'].apply(
-#     lambda x: clean_text(x))
-
-# corpus_es.constitution_lemma = corpus_es['constitution_lemma'].apply(
-#     lambda x: clean_text(x))
-# corpus_es.constitution = corpus_es['constitution'].apply(
-#     lambda x: clean_text(x))
-
-corpus_all.constitution_lemma = corpus_all['constitution_lemma'].apply(
-    lambda x: clean_text(x))
-corpus_all.constitution = corpus_all['constitution'].apply(
-    lambda x: clean_text(x))
-
-
-# Add a column with the name of the language of each constitution
-# corpus_eng['lang'] = 'eng'
-# corpus_es['lang'] = 'es'
-
-# Choose the best definition according to your needs!
-
-# df_total = pd.concat([corpus_eng, corpus_es], ignore_index=True)
-df_total = corpus_all
-
-df_total.to_pickle('./results/df_total_all_set.pkl')
-df_total.to_csv('./results/df_total_texts.csv')
-data = df_total.constitution_lemma.to_list()
-
-# =============================================================================
-# We create the list of stopwords
-# =============================================================================
-gensim_stop = STOPWORDS
-nltk.download('stopwords')
-stop_words = stopwords.words('english')
-stop_words.extend(['from', 'subject', 're', 'edu', 'use', 'i', 'ii', 'iii',
-                   'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x', 'xi', 'xii',
-                   'xiii', 'xiv', 'xv', 'xvi', 'xvii', 'xviii', 'xix', 'xx',
-                   'xxi', 'xxii', 'xxiii', 'xxiv', 'xxv', 'xxvi', 'xxvii',
-                   'xxviii', 'xxix', 'xxx', 'xxxi', 'xxxii', 'xxxiii',
-                   'xxxiv', 'xxxv', 'xxxvi', 'xxxvii', 'xxxviii', 'xxxix',
-                   'xl', 'xli', 'xlii', 'xlii', 'xliii',  'xliv', 'xlv',
-                   'xlvi', 'xlvii', 'xlviii', 'xlix', 'l', 'li', 'lii', 'liii',
-                   'liv', 'lv', 'lvi', 'lvii', 'lviii', 'lix', 'lx', 'lxi',
-                   'lxii', 'lxiii', 'lxiv', 'lxv', 'lxvi', 'lxvii', 'lxviii',
-                   'lxix', 'lxx', 'lxxi', 'lxxii', 'lxxiii', 'lxxiv', 'lxxv',
-                   'lxxvi', 'lxxvii', 'lxxviii', 'lxxix', 'lxxx', 'lxxxi',
-                   'lxxxii', 'lxxxiii', 'lxxxiv', 'lxxxv',  'lxxxvi',
-                   'lxxxvii', 'lxxxviii', 'lxxxix', 'xc', 'xci', 'xcii',
-                   'xciii', 'xciv', 'xcv', 'xcvi', 'xcvii', 'xcviii', 'xcix',
-                   'c', 'january', 'february', 'march', 'april', 'may',
-                   'june', 'july', 'august', 'september', 'october',
-                   'november', 'december', '+', 'shall', '*', 'copyright',
-                   'project', 'constitutions', 'projects', 'stanford',
-                   'havard', 'united nations', 'volume', 'ohio', 'preamble'
-                   '©', 'bibliography', '<', '>', '/', 'may',
-                   'constitution', 'country', 'shall', 'hoover', 'project',
-                   'institution', 'new york', 'washington'])
-stop_words.extend(gensim_stop)
-stop_words.extend(['sub', 'clause', 'article'])
-
-
-# =============================================================================
-# Tokenizing options
-# =============================================================================
-def sent_to_words(sentences):
-    """Do a simple tokenization."""
-    for sentence in sentences:
-        yield(gensim.utils.simple_preprocess(str(sentence), deacc=True))
-
-
-def spacy_tokenize(sentences):
-    """Do a simple tokenization with Spacy.
-
-    Also removes stopwords and removes words that are not NOUN, VERB or ADV.
-    """
-    texts_out = []
-    nlp = spacy.load('en_core_web_lg', disable=['parser', 'ner'])
-    for text in sentences:
-        doc = nlp(text)
-        texts_out.append([token.text for token in doc if not token.is_stop
-                          and token.pos_ in ['NOUN', 'VERB', 'ADJ']])
-
-    text_final = [' '.join(item) for item in texts_out]
-
-    return text_final
-
-
-# =============================================================================
-# Creating final objects
-# =============================================================================
-data_words = spacy_tokenize(data)
-data_words = list(sent_to_words(data))
-
-
-# Build the bigram and trigram models
-bigram = gensim.models.Phrases(data_words, min_count=5, threshold=100)
-trigram = gensim.models.Phrases(bigram[data_words], threshold=100)
-
-# Faster way to get a sentence clubbed as a trigram/bigram
-bigram_mod = gensim.models.phrases.Phraser(bigram)
-trigram_mod = gensim.models.phrases.Phraser(trigram)
-
-
-# Define functions for stopwords, bigrams, trigrams and lemmatization
-def remove_stopwords(texts):
-    """Remove stopwords."""
-    return [[word for word in simple_preprocess(str(doc)) if word not in
-             stop_words] for doc in texts]
-
-
-def make_bigrams(texts):
-    """Create bigrams."""
-    return [bigram_mod[doc] for doc in texts]
-
-
-def make_trigrams(texts):
-    """Make trigrams."""
-    return [trigram_mod[bigram_mod[doc]] for doc in texts]
-
-
-# Applyinh the functions just defined
-data_words_nostops = remove_stopwords(data_words)
-data_words_bigrams = make_bigrams(data_words_nostops)
-
-# Save final results into a dataframe containing name and year of constitution
-constitutions = df_total.copy()
-constitutions['document'] = data_words_bigrams
-constitutions.to_csv('results/csv/constitutions.csv')
+data_words_bigrams = get_constitutions_bigrams()
 
 # Create Dictionary
 id2word = corpora.Dictionary(data_words_bigrams)
@@ -304,11 +77,12 @@ texts = data_words_bigrams
 # Term Document Frequency
 corpus = [id2word.doc2bow(text) for text in texts]
 
-# Get the number of differents words in the corpus
+# Get the number of different words in the corpus
 n_words = id2word.num_pos
-# Get the most common 50 words in the corpus (possiblity removing them as
+# Get the most common 50 words in the corpus (possibility removing them as
 # stopwords in further runs)
-words_list = [word for words in data_words for word in words]
+words_list_list = [words.split() for words in data_words]
+words_list = [word for words in words_list_list for word in words]
 most_common_words = Counter(words_list).most_common(50)
 
 # =============================================================================
@@ -377,7 +151,7 @@ for m, cv in zip(x, coherence_values):
     print("Num Topics =", m, " has Coherence Value of", round(cv, 4))
 
 
-# Get the best model or the prefered one
+# Get the best model or the preferred one
 def get_model(list_coherence, list_models, best_model=True, non_optimal=50):
     """
     Return the model selected in a list of models.
@@ -400,7 +174,7 @@ def get_model(list_coherence, list_models, best_model=True, non_optimal=50):
     index_non_optimal = list(range_topics).index(non_optimal)
     index_max = max(range(len(list_coherence)),
                     key=list_coherence.__getitem__)
-    # Get the number of topics in the best model or the one choosen
+    # Get the number of topics in the best model or the one chosen
     if best_model:
         optimal_model = list_models[index_max]
         topics_number = range_topics[index_max]

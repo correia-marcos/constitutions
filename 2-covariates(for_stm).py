@@ -39,21 +39,22 @@ cppc_file = r'Data/comparative_project/'
 data_constitutions = pd.read_csv(file_constitutions, index_col=0)
 
 # Drop unnecessary columns
-data_constitutions = data_constitutions.drop('constitution', axis=1)
-data_constitutions = data_constitutions.drop('constitution_lemma', axis=1)
+# data_constitutions = data_constitutions.drop('constitution', axis=1)
+# data_constitutions = data_constitutions.drop('constitution_lemma', axis=1)
 
 # Finally, make better type of object on document column (was a list and we
 # want a single string)
-# Attention: actually was not a list but actually a string formatted as such
+# Attention: actually was not a list but a string formatted as such
 # We employed this "ast" library to save trouble
-data_constitutions['document'] = data_constitutions['document'].apply(
-    lambda x: ast.literal_eval(x))
+# data_constitutions['document'] = data_constitutions['document'].apply(
+#     lambda x: ast.literal_eval(x))
 
-data_constitutions['document'] = data_constitutions['document'].apply(
-    lambda x: " ".join(x))
+# data_constitutions['document'] = data_constitutions['document'].apply(
+#     lambda x: " ".join(x))
 
 # Add column for number of words in lemma documents
-data_constitutions['length_preprocess'] = data_constitutions['document'].apply(
+data_constitutions['length_preprocess'] = \
+    data_constitutions['constitution_lemma'].apply(
     lambda x: len(x.split()))
 # =============================================================================
 # Colonies Dataset
