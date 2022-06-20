@@ -60,6 +60,7 @@ def get_table(dataset_text, covariates_data, index='Series Name'):
 # AHDI FROM LAPORTA
 # Adding info from the AHDI file in Data/AHDI
 
+
 ahdi = pd.read_excel('Data/AHDI/AHDI_1.1-1.xlsx', sheet_name='AHDI')
 ahdi.columns = ['code', 'country_ahdi', 'ahdi_1870', 'ahdi_1880',
                 'ahdi_1890',
@@ -154,25 +155,47 @@ legal_origins = legal_origins[['code', 'legor_uk', 'legor_fr',
                                'legor_ge', 'legor_sc', 'legor_so']]
 
 # Adding together dataframe and ahdi
-final_df = pd.merge(df_added, legal_origins, on='code', how='left', copy=False)
 final_df = pd.merge(df_added, ahdi, how='left', on='code', copy=False)
+final_df = pd.merge(final_df, legal_origins, on='code', how='left', copy=False)
 
 # Cleaning some more
 final_df = final_df.drop('country_y', axis=1)
 final_df = final_df.drop('codes', axis=1)
-final_df = final_df.rename(columns = {'country_x': 'country'})
+final_df = final_df.rename(columns={'country_x': 'country'})
 
 # =============================================================================
 # Adding up number of amendments
 # =============================================================================
 amendments = pd.read_csv(f'{FOLDER}/amendments.csv')
 amendments = amendments.drop('Unnamed: 0', axis=1)
-final_df = final_df.merge(amendments, on='country',how='left', copy=False)
+final_df = final_df.merge(amendments, on='country', how='left', copy=False)
+
+# =============================================================================
+# Adding up number of constitutions
+# =============================================================================
+constitutions = pd.read_csv(rf'{FOLDER}/constitutions.csv')
+
+# Dropping have and uncesserary data
+
+constitutions = constitutions.drop('constitution_lemma', axis=1)
+constitutions = constitutions.drop('constitution', axis=1)
+constitutions = constitutions.drop('document', axis=1)
+
+# Get the number of times each country repeats in the dataset: the number of
+# constitutions
+constitutions = constitutions['country'].value_counts()
+constitutions = constitutions.reset_index(level=0)
+constitutions.columns = ['country', 'num_constitutions']
+
+# Adding this to the final_dataset
+final_df = final_df.merge(constitutions, on='country', how='left', copy=False)
+# =============================================================================
+# Saving Final dataset and creating
+# =============================================================================
 
 # Creating Pandas Profiling - too much variables to handle
 # small_df = final_df.iloc[:, 0:50].join(final_df.iloc[:, -50:])
 report = ProfileReport(final_df, title='Pandas Profile Report')
 
-# Saving results
 final_df.to_csv(f'{FOLDER}/all_variables_reg(03_06).csv')
-report.to_file(r'results/HTML/all_variables.html')
+# report.to_file(r'results/HTML/all_variables.html')
