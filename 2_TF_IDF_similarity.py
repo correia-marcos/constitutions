@@ -4,6 +4,7 @@ Program to run tf-idf + cosine similarity between constitutions.
 
 @author: marcos
 """
+# Import required libraries
 import glob
 import os
 import pandas as pd
@@ -58,19 +59,19 @@ def get_df(texts):
     None.
 
     """
-    country = []
+    countries = []
     year = []
     constitution = []
 
     for txt in texts:
         country_year = os.path.splitext((os.path.basename(txt)))[0]
-        country.append(' '.join(country_year.split('_')[:-1]))
+        countries.append(' '.join(country_year.split('_')[:-1]))
         year.append(country_year.split('_')[-1])
 
         with io.open(txt, 'r', encoding='utf-8', errors='ignore') as fout:
             constitution.append(''.join(fout.readlines()))
 
-    corpus = pd.DataFrame({'country': country, 'year': year,
+    corpus = pd.DataFrame({'country': countries, 'year': year,
                            'constitution': constitution})
 
     return corpus

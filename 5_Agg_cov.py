@@ -10,7 +10,6 @@ to some papers (see https://scholar.harvard.edu/shleifer/publications)
 import pandas as pd
 import numpy as np
 from pandas_profiling import ProfileReport
-
 FOLDER = r'results/csv'
 
 data = pd.read_csv(fr'{FOLDER}/all_textual_variables(03_06).csv',

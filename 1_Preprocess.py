@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-qu
 """
 Basic main code. It does the first creation of the dataset we will
 throughout this project.
@@ -6,7 +6,6 @@ throughout this project.
         preprocess the textual dataset.
 @author: Marcos
 """
-
 import glob
 import os
 import io
@@ -25,9 +24,7 @@ from gensim.parsing.preprocessing import STOPWORDS
 
 
 def new_func():
-    """Not important to understand, make it easier to see what is happening in LDA.
-    """
-
+    """Make it easier to see what is happening in LDA."""
     warnings.filterwarnings("ignore", category=DeprecationWarning)
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s',
                         level=logging.INFO)
@@ -127,7 +124,7 @@ def clean_text(text):
 
     Make text lowercase, remove text in square brackets, remove
     punctuation, remove digits in general, remove urls, remove
-    emails and remove "" characters.
+    emails, remove "" characters and others.
     Also remove some common and bad words such as "Chapter" and "Copyright".
     """
     text = text.lower()

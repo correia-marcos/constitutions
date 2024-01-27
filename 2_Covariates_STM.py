@@ -139,7 +139,7 @@ def get_amendments(cpp_data_df):
     """ Calculates total amount of amendments (evnttype=1) for each country."""
     grouped = cpp_data_df.groupby('country')['evnttype'].agg(
         lambda x: x.eq(1).sum())
-    grouped = df_grouped.reset_index()
+    grouped = grouped.reset_index()
     grouped.columns = ['country', 'num_amendments']
 
     return grouped
