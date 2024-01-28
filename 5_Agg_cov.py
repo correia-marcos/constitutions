@@ -30,7 +30,8 @@ def get_table(dataset_text, covariates_data, index='Series Name'):
         dataset_text (DataFrame): Dataframe created before with textual_data
         covariates_data (DataFrame): all Dataframes from World Bank works
 
-    Returns:
+    Returns
+    -------
         DataFrame: merge dataframe
     """
     covariates_data = covariates_data.set_index(index)
