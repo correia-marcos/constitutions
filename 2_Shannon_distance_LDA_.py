@@ -7,6 +7,7 @@ LDA method.
 
 @author: marcola
 """
+# Import the required libraries
 import pandas as pd
 import numpy as np
 from scipy.stats import entropy
@@ -62,8 +63,7 @@ for country in dfs:
         similarity_first.append(sim)
 
 final_first = df_final[['country', 'year']]
-final_first['similarity'] = similarity_first
-
+final_first.insert(2, "similarity", similarity_first, True)
 
 # This small loop do the calculation in the right rows (for comparasion in
 # sequence).
@@ -77,11 +77,9 @@ for country in dfs:
 
 
 final_sequence = df_final[['country', 'year']]
-final_sequence['similarity'] = similarity_sequence
-
+final_sequence.insert(2, "similarity", similarity_sequence, True)
 
 # Saving data
-
 final_first.to_excel(
     'results/excel/comparações_prime_45topics(fullset_06_02).xlsx')
 final_sequence.to_excel(
@@ -92,7 +90,6 @@ final_sequence.to_csv('results/csv/comp_seq_50topics(fullset_08_05).csv')
 
 # =============================================================================
 # =============================================================================
-#
 # Taking Results from STM model (R) as well
 # =============================================================================
 # =============================================================================
@@ -133,7 +130,7 @@ for country in dfs_stm:
         similarity_first_stm.append(sim)
 
 final_first_stm = df_stm[['country', 'year']]
-final_first_stm['similarity'] = similarity_first_stm
+final_first_stm.insert(2, "similarity", similarity_first_stm, True)
 
 
 # This small loop do the calculation in the right rows (for comparasion in
@@ -148,7 +145,7 @@ for country in dfs_stm:
 
 
 final_sequence_stm = df_final[['country', 'year']]
-final_sequence_stm['similarity'] = similarity_sequence_stm
+final_sequence_stm.insert(2, 'similarity', similarity_sequence_stm, True)
 
 
 # Saving dataset
