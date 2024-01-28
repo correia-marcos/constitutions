@@ -12,8 +12,6 @@ import glob
 import os
 import io
 import re
-import logging
-import warnings
 import pandas as pd
 
 import nltk
@@ -24,15 +22,6 @@ import gensim
 from gensim.utils import simple_preprocess
 from gensim.parsing.preprocessing import STOPWORDS
 
-
-def new_func():
-    """Make it easier to see what is happening in LDA."""
-    warnings.filterwarnings("ignore", category=DeprecationWarning)
-    logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s',
-                        level=logging.INFO)
-
-
-new_func()
 # Small workaround for duplication in files
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
@@ -111,11 +100,13 @@ all_lemma = lemmatization(data_all)
 all_lemma = [' '.join(item) for item in all_lemma]
 
 # Adding the new lemmatized data to the respective DFs
-# corpus_eng['constitution_lemma'] = eng_lemma
-# corpus_es['constitution_lemma'] = es_lemma
 corpus_all['constitution_lemma'] = all_lemma
 
 corpus_all.to_pickle(r'results/df_lemma(not_cleaned).pkl')
+
+# =============================================================================
+# Cleaning text
+# =============================================================================
 
 
 def clean_text(text):
@@ -157,21 +148,18 @@ def clean_text(text):
 
 
 # Applying the cleaning approach to texts
-corpus_all.constitution_lemma = corpus_all['constitution_lemma'].apply(
-    clean_text)
-corpus_all.constitution = corpus_all['constitution'].apply(
-    clean_text)
+corpus_all.constitution_lemma = corpus_all.constitution_lemma.apply(clean_text)
+corpus_all.constitution = corpus_all.constitution.apply(clean_text)
 
 # Copy dataset and then saving it
 df_total = corpus_all
 
 df_total.to_pickle('./results/df_total_all_set.pkl')
-df_total.to_csv('./results/df_total_texts.csv')
-# df_total = pd.read_csv('./results/df_total_texts.csv').iloc[:, 1:]
-data = df_total.constitution_lemma.to_list()
+df_total.to_csv('./results/csv/df_total_texts.csv')
+
 
 # =============================================================================
-# We create the list of stopwords
+# Cleaning: removing list of stopwords
 # =============================================================================
 gensim_stop = STOPWORDS
 nltk.download('stopwords')
@@ -203,13 +191,10 @@ stop_words.extend(gensim_stop)
 stop_words.extend(['sub', 'clause', 'article'])
 
 
-# =============================================================================
-# Tokenizing options
-# =============================================================================
 def sent_to_words(sentences):
     """Do a simple tokenization."""
     for sentence in sentences:
-        yield(gensim.utils.simple_preprocess(str(sentence), deacc=True))
+        yield gensim.utils.simple_preprocess(str(sentence), deacc=True)
 
 
 def spacy_tokenize(sentences):
@@ -232,6 +217,7 @@ def spacy_tokenize(sentences):
 # =============================================================================
 # Creating final objects
 # =============================================================================
+data = df_total.constitution_lemma.to_list()
 data_words = spacy_tokenize(data)
 data_words = list(sent_to_words(data))
 
