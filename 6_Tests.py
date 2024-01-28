@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri May 20 10:06:13 2022
+Check relantion of USA with other contries.
 
 Trying to see the relantionship between usa and other constitutions.
 @author: marcola
@@ -8,7 +8,6 @@ Trying to see the relantionship between usa and other constitutions.
 import pandas as pd
 import numpy as np
 from scipy.spatial.distance import jensenshannon
-import matplotlib.pyplot as plt
 
 folder = r'results/Topics_models'
 df_final = pd.read_pickle(f'{folder}/df_topics(50topics_08_05(full_set)).pkl')
