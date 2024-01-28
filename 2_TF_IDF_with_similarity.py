@@ -138,7 +138,7 @@ for country in dfs:
         similarity_prime.append(value)
 
 final_prime = df[['country', 'year']]
-final_prime.insert(2, 'simirality', similarity_prime, True)
+final_prime.insert(2, 'similarity', similarity_prime, True)
 
 
 # This small loop do the calculation in the right rows (for comparative in
