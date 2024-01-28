@@ -18,7 +18,7 @@ Also, we compute adjusted measures of our project:
 """
 import numpy as np
 import pandas as pd
-from pandas_profiling import ProfileReport
+from ydata_profiling import ProfileReport
 
 FOLDER = r'results/csv'
 
