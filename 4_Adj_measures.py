@@ -18,7 +18,7 @@ Also, we compute adjusted measures of our project:
 """
 import numpy as np
 import pandas as pd
-from pandas_profiling import ProfileReport
+from ydata_profiling import ProfileReport
 
 FOLDER = r'results/csv'
 
@@ -45,7 +45,7 @@ stm_seq = pd.read_csv(f'{FOLDER}/stm_seq_50topics(fullset_03_06).csv',
 # =============================================================================
 # =============================================================================
 # FOR NOW ON, LET'S FIRST ANALYZE THE PRIME DATAFRAMES
-# AFTER WE ADJUST FOR SEQUENCE DAtAFRAMES
+# AFTER WE ADJUST FOR SEQUENCE DATAFRAMES
 # =============================================================================
 # =============================================================================
 
@@ -98,7 +98,8 @@ df_all = df_all.merge(use_prime, how='left')
 df_all = df_all.merge(stm_prime, how='outer')
 
 # Save correlations as df
-corr = df_all.corr()
+corr = df_all[['year', 'distance_tfidf', 'distance_lda50', 'distance_use',
+               'distance_stm50']].corr()
 corr.to_csv(f'{FOLDER}/correlations(fullset_03_06).csv')
 
 
@@ -130,7 +131,7 @@ def get_adjusted(dataset):
     """
     # Data structure we need
     base = dataset.set_index('country')
-    df_group = base.groupby(['country'])
+    df_group = base.groupby('country')
     dfs_dict = dict(tuple(df_group))
 
     # Defining necessary variables
@@ -274,7 +275,8 @@ data = data[cols]
 data.to_csv(f'{FOLDER}/textual_variables_prime(03_06).csv')
 
 # Save dataframe with all correlations
-matrix = data.corr()
+numerical_columns = data.iloc[:, 2:].columns
+matrix = data[numerical_columns].corr()
 matrix.to_csv(f'{FOLDER}/all_correlations(03_06).csv')
 
 # =============================================================================
@@ -323,8 +325,6 @@ df_all_seq = df_all_seq.merge(lda_seq, how='outer')
 df_all_seq = df_all_seq.merge(use_seq, how='left')
 df_all_seq = df_all_seq.merge(stm_seq, how='outer')
 
-# corr = df_all_seq.corr()
-
 
 def get_adjusted_seq(dataset):
     """
@@ -347,7 +347,7 @@ def get_adjusted_seq(dataset):
     """
     # Defining necessary variables
     base_seq = dataset.set_index('country')
-    df_group_seq = base_seq.groupby(['country'])
+    df_group_seq = base_seq.groupby('country')
     dfs_seq_dict = dict(tuple(df_group_seq))
 
     countries = []
