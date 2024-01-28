@@ -4,7 +4,6 @@ Creates the LDA object.
 
 @author: Marcos
 """
-import itertools
 from pprint import pprint
 from collections import Counter
 import pandas as pd
@@ -23,8 +22,7 @@ import warnings
 
 
 def new_func():
-    """Not important to understand, make it easier to see what is happening in LDA.
-    """
+    """Make it easier to see what is happening in LDA."""
     warnings.filterwarnings("ignore", category=DeprecationWarning)
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s',
                         level=logging.INFO)
@@ -34,26 +32,21 @@ new_func()
 
 # Reading important files and taking lists (better to work)
 
-# %%
-xs = ['1', '2', '3']
-s = ''.join(xs)
-print(s)
-# %%
 
-
-def get_df_and_list():
-    df_total = pd.read_csv('./results/df_total_texts.csv').iloc[:, 1:]
+def get_df_and_list(file):
+    """Take a csv file and return a df and a column as list."""
+    df_total = pd.read_csv(file).iloc[:, 1:]
     data_words = df_total.constitution_lemma.to_list()
     return df_total, data_words
 
 
-df_total, data_words = get_df_and_list()
+df_total, data_words = get_df_and_list('./results/df_total_texts.csv')
 
 # Reading important files and taking lists (better to work)
 
 
 def get_constitutions_bigrams():
-    """Get the constitutions dataframe from csv and take the necessary column."""
+    """Get the constitutions df from csv and take the necessary column."""
     constitutions = pd.read_csv('results/csv/constitutions.csv')
 
     # Note that the column 'document' has a string that appear as a list.
@@ -256,17 +249,19 @@ df_final = df_final.join(topicSeriesDf)
 # is different. This should have be done as an automatized function, but
 # I was a little low in time.
 
-df_final.columns = ['country', 'year', 'Topic 1', 'Topic 2', 'Topic 3',
-                    'Topic 4', 'Topic 5', 'Topic 6', 'Topic 7', 'Topic 8',
-                    'Topic 9', 'Topic 10', 'Topic 11', 'Topic 12', 'Topic 13',
-                    'Topic 14', 'Topic 15', 'Topic 16', 'Topic 17', 'Topic 18',
-                    'Topic 19', 'Topic 20', 'Topic 21', 'Topic 22', 'Topic 23',
-                    'Topic 24', 'Topic 25', 'Topic 26', 'Topic 27', 'Topic 28',
-                    'Topic 29', 'Topic 30', 'Topic 31', 'Topic 32', 'Topic 33',
-                    'Topic 34', 'Topic 35', 'Topic 36', 'Topic 37', 'Topic 38',
-                    'Topic 39', 'Topic 40', 'Topic 41', 'Topic 42', 'Topic 43',
-                    'Topic 44', 'Topic 45', 'Topic 46', 'Topic 47', 'Topic 48',
-                    'Topic 49', 'Topic 50']
+# df_final.columns = ['country', 'year', 'Topic 1', 'Topic 2', 'Topic 3',
+#                     'Topic 4', 'Topic 5', 'Topic 6', 'Topic 7', 'Topic 8',
+#                     'Topic 9', 'Topic 10', 'Topic 11', 'Topic 12',
+#                     'Topic 13', 'Topic 14', 'Topic 15', 'Topic 16',
+#                     'Topic 17', 'Topic 18', 'Topic 19', 'Topic 20',
+#                     'Topic 21', 'Topic 22', 'Topic 23', 'Topic 24',
+#                     'Topic 25', 'Topic 26', 'Topic 27', 'Topic 28',
+#                     'Topic 29', 'Topic 30', 'Topic 31', 'Topic 32',
+#                     'Topic 33', 'Topic 34', 'Topic 35', 'Topic 36',
+#                     'Topic 37', 'Topic 38', 'Topic 39', 'Topic 40',
+#                     'Topic 41', 'Topic 42', 'Topic 43', 'Topic 44',
+#                     'Topic 45', 'Topic 46', 'Topic 47', 'Topic 48',
+#                     'Topic 49', 'Topic 50']
 
 folder = r'results/Topics_models/'
 df_final.to_pickle(rf'{folder}/df_topics(50topics_08_05(full_set)).pkl')
