@@ -2,24 +2,26 @@
 """
 Add a lot of covariates.
 
-We took data from a lot o sources, from Word Bank and Polity 4
+We took data from a lot o sources, from Word Bank and Polity 5
 to some papers (see https://scholar.harvard.edu/shleifer/publications)
 
 @author: marcos
 """
 import pandas as pd
 import numpy as np
-from pandas_profiling import ProfileReport
+from ydata_profiling import ProfileReport
+
+# Name of the folder
 FOLDER = r'results/csv'
 
+# Import required file
 data = pd.read_csv(fr'{FOLDER}/all_textual_variables(03_06).csv',
                    index_col=False)
 data = data.drop('Unnamed: 0', axis=1)
 
 
-# The way we exported data from Word_bank, the dataset were in a
-# "tidy data" format that I don't use much and is not good for regressions.
-# The function below was done to create a dataset
+# The way we exported data from Word_bank, the dataset were not in a
+# "tidy data" format. The function below was done to create a dataset
 # in the right way for running regressions.
 
 
@@ -35,7 +37,7 @@ def get_table(dataset_text, covariates_data, index='Series Name'):
         DataFrame: merge dataframe
     """
     covariates_data = covariates_data.set_index(index)
-    df_grouped = covariates_data.groupby([index])
+    df_grouped = covariates_data.groupby(index)
     dfs = dict(tuple(df_grouped))
 
     dataframe = dataset_text.copy()
@@ -198,4 +200,4 @@ final_df = final_df.merge(constitutions, on='country', how='left', copy=False)
 report = ProfileReport(final_df, title='Pandas Profile Report')
 
 final_df.to_csv(f'{FOLDER}/all_variables_reg(03_06).csv')
-# report.to_file(r'results/HTML/all_variables.html')
+report.to_file(r'results/HTML/all_variables.html')
