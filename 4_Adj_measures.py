@@ -262,10 +262,11 @@ data = data.drop('Unnamed: 0', axis=1)
 
 # Changing cols names and columns positions
 data = data.rename(columns={'country_code': 'code'})
-cols = ['code', 'country', '1st_const_year', '2nd_const_year', '1st_2nd_tfidf',
-        '1st_current_tfidf', '1st_2nd_lda', '1st_current_lda', '1st_2nd_use',
-        '1st_current_use', '1st_2nd_stm', '1st_current_stm',
-        'constitutional_time', 'first_regime_time', '1st_2nd_tfidf_adj',
+cols = ['code', 'country', '1st_const_year', '2nd_const_year',
+        '1st_2nd_tfidf', '1st_current_tfidf', '1st_2nd_lda',
+        '1st_current_lda', '1st_2nd_use', '1st_current_use',
+        '1st_2nd_stm', '1st_current_stm', 'constitutional_time',
+        'first_regime_time', '1st_2nd_tfidf_adj',
         '1st_2nd_lda_adj', '1st_2nd_use_adj', '1st_2nd_stm_adj',
         '1st_curr_tfidf_adj', '1st_curr_lda_adj', '1st_curr_use_adj',
         '1st_curr_stm_adj']
@@ -387,6 +388,30 @@ final_data = pd.merge(left=data, right=data_seq,
                       how='left', copy=False)
 # Saving dataset
 final_data.to_csv(f'{FOLDER}/all_textual_variables(03_06).csv')
+
+# Change the columns names of both "df_all" dataframes
+df_all = df_all.rename(columns={'distance_tfidf': 'distance_tfidf_prime',
+                                'distance_lda50': 'distance_lda50_prime',
+                                'distance_use': 'distance_use_prime',
+                                'distance_stm50': 'distance_stm50_prime'})
+
+df_all_seq = df_all_seq.rename(columns={
+    'distance_tfidf': 'distance_tfidf_sequence',
+    'distance_lda50': 'distance_lda50_sequence',
+    'distance_use': 'distance_use_sequence',
+    'distance_stm50': 'distance_stm50_sequence'})
+
+
+# Save df_final and df_final_seq dataframes for panel anaylsis
+panel_data = pd.merge(left=df_all, right=df_all_seq,
+                      left_on=['country', 'year'],
+                      right_on=['country', 'year'],
+                      how='left', copy=False)
+
+# Saving dataset
+panel_data.to_csv(f'{FOLDER}/panel_text_variables.csv')
+
+# Pandas Profiling
 profile = ProfileReport(final_data,
                         title="Pandas Profiling Report")
 profile.to_file(r'results/HTML/textual_data.html')
